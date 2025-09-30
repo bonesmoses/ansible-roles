@@ -1,0 +1,90 @@
+---
+
+- name: Create a directory for domain-specific configuration files
+  file:
+    path: /etc/lighttpd/domains
+    state: directory
+  become: true
+
+- name: Enable a few of the necessary modules to run sites
+  file:
+    src: /etc/lighttpd/conf-available/{{ item }}
+    path: /etc/lighttpd/conf-enabled/{{ item }}
+    state: link
+  loop:
+    - 10-fastcgi.conf
+    - 10-magnet.conf
+    - 10-ssl.conf
+    - 15-fastcgi-php.conf
+  become: true
+
+- name: Generate a default self-signed OpenSSL private key
+  community.crypto.openssl_privatekey:
+    path: /etc/ssl/private/lighttpd.key
+  become: true
+
+- name: Generate a default self-signed OpenSSL certificate
+  community.crypto.x509_certificate:
+    path: /etc/ssl/certs/lighttpd-default.crt
+    privatekey_path: /etc/ssl/private/lighttpd.key
+    provider: selfsigned
+  become: true
+
+- name: Append the private key and certificate together for Lighttpd use
+  shell:
+    cmd: |
+      cp /etc/ssl/private/lighttpd.key /etc/lighttpd/server.pem
+      cat /etc/ssl/certs/lighttpd-default.crt >> /etc/lighttpd/server.pem
+    creates: /etc/lighttpd/server.pem
+  become: true
+
+- name: Enable following of symbolic links
+  lineinfile: 
+    path: /etc/lighttpd/lighttpd.conf
+    regexp: 'follow-symlink'
+    line: server.follow-symlink = "enable"
+  become: true
+
+- name: Change the expected document root
+  lineinfile: 
+    path: /etc/lighttpd/lighttpd.conf
+    regexp: 'document-root'
+    line: server.document-root = "/var/www/"
+  become: true
+
+- name: Enable several server modules necessary for operation
+  blockinfile:
+    path: /etc/lighttpd/lighttpd.conf
+    marker_begin: begin-modules
+    marker_end: end-modules
+    block: |
+      server.modules += ( 
+            "mod_access",
+            "mod_alias",
+            "mod_accesslog",
+            "mod_rewrite", 
+            "mod_redirect", 
+            "mod_evhost",
+            "mod_compress",
+      )
+  become: true
+
+- name: Configure the evhost module to find our document roots properly.
+  lineinfile: 
+    path: /etc/lighttpd/lighttpd.conf
+    line: evhost.path-pattern = "/var/www/%0/%3/htdocs/"
+  become: true
+
+- name: Include all conf files for enabled domains
+  lineinfile: 
+    path: /etc/lighttpd/lighttpd.conf
+    line: include "/etc/lighttpd/domains/*.conf"
+  become: true
+
+- name: Reload lighttpd to apply config changes
+  service:
+    name: lighttpd
+    state: reloaded
+  become: true
+
+

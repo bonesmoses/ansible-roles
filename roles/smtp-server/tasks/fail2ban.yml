@@ -1,0 +1,19 @@
+---
+
+- name: Define extra fail2ban ban filters
+  copy:
+    src: fail2ban/filter.d/
+    dest: /etc/fail2ban/filter.d/
+  become: true
+
+- name: Enable dovecot and postfix fail2ban jail modes
+  copy:
+    src: fail2ban/jail.d/
+    dest: /etc/fail2ban/jail.d/
+  become: true
+
+- name: Bounce fail2ban state to incorporate any config changes
+  service:
+    name: fail2ban
+    state: reloaded
+  become: true

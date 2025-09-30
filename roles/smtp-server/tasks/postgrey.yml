@@ -1,0 +1,13 @@
+---
+
+- name: Update the current list of whitelisted domains
+  template: 
+    dest: /etc/postgrey/whitelist_clients.local
+    src: templates/whitelist_clients.local.j2
+  become: true
+
+- name: Ensure the Postgrey service is up and running
+  service:
+    name: postgrey
+    state: restarted
+  become: true

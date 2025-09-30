@@ -1,0 +1,11 @@
+---
+
+- hosts: webserver
+  roles:
+    - common
+    - role: firewall
+      when: public_facing
+    - role: smtp-server
+    - role: webserver
+
+

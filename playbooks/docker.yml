@@ -1,0 +1,6 @@
+---
+
+- hosts: utility
+  roles:
+    - common
+    - docker

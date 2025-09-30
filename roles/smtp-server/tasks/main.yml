@@ -1,0 +1,15 @@
+---
+
+- name: Ensure SMTP-related packages are installed
+  package:
+    name:
+      - dovecot-core
+      - dovecot-imapd
+      - postfix
+      - postfix-pcre
+      - postgrey
+    state: present
+  become: true
+
+- include_tasks: fail2ban.yml
+- include_tasks: postgrey.yml

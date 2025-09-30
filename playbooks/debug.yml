@@ -1,0 +1,13 @@
+---
+
+- hosts: proxmox
+  tasks:
+
+    - name: Print all available facts
+      debug:
+        var: ansible_facts
+
+    - name: Print Groups
+      debug:
+        var: group_names
+

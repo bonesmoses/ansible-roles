@@ -1,0 +1,32 @@
+---
+
+- name: Ensure Webserver-related packages are installed
+  package:
+    name:
+      - lighttpd
+      - lighttpd-mod-magnet
+      - git
+      - php-auth-sasl
+      - php-cgi
+      - php-cli
+      - php-curl
+      - php-gd
+      - php-json
+      - php-mail-mime
+      - php-memcached
+      - php-msgpack
+      - php-net-smtp
+      - php-net-socket
+      - php-pear
+      - php-readline
+      - php-sqlite3
+      - php-xml
+      - php-zip
+      - python3-openssl
+    state: present
+  become: true
+
+- include_tasks: hugo.yml
+- include_tasks: lighttpd.yml
+
+

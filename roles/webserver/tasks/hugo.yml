@@ -1,0 +1,26 @@
+---
+
+# Install Hugo, which is used for static site building
+
+- name: Set filenames / paths shortcuts for Hugo-related components
+  set_fact:
+    hugo_package: hugo_{{ hugo_version }}_linux-amd64.deb
+    hugo_package_path: /{{ ansible_user_id }}/download/hugo_{{ hugo_version }}_linux-amd64.deb
+
+- name: Ensure a target download directory exists
+  file:
+    path: "/{{ ansible_user_id }}/download"
+    state: directory
+  become: true
+
+- name: Download the requested Hugo download version
+  get_url:
+    url: https://github.com/gohugoio/hugo/releases/download/v{{ hugo_version }}/{{ hugo_package }}
+    dest: "{{ hugo_package_path }}"
+    force: false
+  become: true
+
+- name: Install the Hugo package
+  apt:
+    deb: "{{ hugo_package_path }}"
+  become: true    
